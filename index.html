@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f3d3e">
+<title>Ammortamento</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{
+  --bg:#f4f1ea; --card:#fffdf8; --ink:#1d2321; --muted:#6b726e; --line:#e2ddd2;
+  --accent:#0f3d3e; --accent2:#c8763a; --cap:#2f7d6d; --int:#c8763a; --danger:#b3412f;
+}
+@media (prefers-color-scheme: dark){
+  :root{--bg:#121615;--card:#1b201f;--ink:#ecebe6;--muted:#9aa29e;--line:#2c3331;
+  --accent:#5fb3a3;--accent2:#e39a5f;--cap:#5fb3a3;--int:#e39a5f;--danger:#e2735f;}
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{background:var(--accent);color:#fff;padding:calc(14px + env(safe-area-inset-top)) 16px 14px;position:sticky;top:0;z-index:5}
+@media (prefers-color-scheme: dark){header{background:#0c2b2c}}
+header h1{margin:0;font-size:19px;letter-spacing:.3px}
+header p{margin:2px 0 0;font-size:12px;opacity:.75}
+main{padding:16px 16px 96px;max-width:640px;margin:0 auto}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--card);
+  border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);z-index:5}
+nav button{flex:1;border:0;background:none;color:var(--muted);padding:10px 0 12px;font:inherit;font-size:12px;display:flex;flex-direction:column;align-items:center;gap:3px}
+nav button svg{width:24px;height:24px}
+nav button.on{color:var(--accent)}
+.page{display:none}.page.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.card h2{margin:0 0 12px;font-size:15px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.6px}
+.seg{display:flex;background:var(--bg);border-radius:10px;padding:4px;gap:4px;margin-bottom:14px}
+.seg button{flex:1;border:0;background:none;padding:9px 4px;border-radius:7px;font:inherit;font-size:14px;color:var(--muted)}
+.seg button.on{background:var(--card);color:var(--ink);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+label{display:block;font-size:13px;color:var(--muted);margin:0 0 5px}
+.field{margin-bottom:13px}
+.field.hidden{display:none}
+.inp{display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;background:var(--bg);overflow:hidden}
+.inp input,.inp select{flex:1;min-width:0;border:0;background:none;color:var(--ink);font:inherit;font-size:18px;padding:11px 12px;outline:none}
+.inp select{font-size:16px}
+.inp span{padding:0 12px;color:var(--muted);font-size:15px}
+.inp:focus-within{border-color:var(--accent)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{width:100%;border:0;border-radius:11px;background:var(--accent);color:#fff;font:inherit;font-size:16px;font-weight:600;padding:14px;margin-top:4px}
+@media (prefers-color-scheme: dark){.btn{color:#0c2b2c}}
+.btn.alt{background:none;color:var(--accent);border:1.5px solid var(--accent)}
+.btn+.btn{margin-top:10px}
+.err{color:var(--danger);font-size:14px;margin-top:10px;min-height:1px}
+.big{text-align:center;padding:6px 0 14px;border-bottom:1px dashed var(--line);margin-bottom:12px}
+.big small{display:block;color:var(--muted);font-size:13px}
+.big b{font-size:34px;letter-spacing:-.5px;color:var(--accent)}
+.kv{display:flex;justify-content:space-between;padding:6px 0;font-size:15px}
+.kv span{color:var(--muted)}
+.bar{display:flex;height:10px;border-radius:5px;overflow:hidden;margin:10px 0 4px}
+.bar i{display:block}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted)}
+.legend b{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+table{width:100%;border-collapse:collapse;font-size:12px;letter-spacing:-.2px;font-variant-numeric:tabular-nums}
+th{position:sticky;top:0;background:var(--card);text-align:right;font-weight:600;color:var(--muted);padding:8px 3px;border-bottom:1px solid var(--line);font-size:10px;text-transform:uppercase}
+td{text-align:right;padding:7px 3px;white-space:nowrap;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}
+tr.y td{background:var(--bg);font-weight:600}
+.tablewrap{max-height:62vh;overflow:auto;margin:0 -16px;padding:0 16px}
+.empty{color:var(--muted);text-align:center;padding:30px 10px;font-size:15px}
+.q{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}
+.q:last-child{border-bottom:0}
+.q .t{flex:1;min-width:0}
+.q .t b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.q .t small{color:var(--muted);font-size:13px}
+.q button{border:0;background:var(--bg);color:var(--ink);border-radius:9px;padding:9px 11px;font:inherit;font-size:14px}
+.q button.del{color:var(--danger)}
+.toggle{display:flex;gap:8px;margin-bottom:12px}
+.toggle button{flex:1;border:1px solid var(--line);background:none;color:var(--muted);border-radius:9px;padding:8px;font:inherit;font-size:14px}
+.toggle button.on{border-color:var(--accent);color:var(--accent);font-weight:600}
+canvas{width:100%;height:170px;display:block}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:20px;font-size:14px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:9}
+.toast.on{opacity:1}
+dialog{border:0;border-radius:16px;padding:20px;background:var(--card);color:var(--ink);width:min(90vw,400px)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+dialog h3{margin:0 0 12px}
+.subtle{font-size:12px;color:var(--muted);margin-top:10px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Ammortamento alla francese</h1>
+  <p id="hdrSub">Simulatore di rata, importo e tasso</p>
+</header>
+
+<main>
+<!-- ============ CALCOLA ============ -->
+<section class="page on" id="p-calc">
+  <div class="card">
+    <h2>Cosa vuoi trovare?</h2>
+    <div class="seg" id="modeSeg">
+      <button data-m="rata" class="on">Rata</button>
+      <button data-m="importo">Importo</button>
+      <button data-m="tasso">Tasso</button>
+    </div>
+
+    <div class="field" data-f="importo">
+      <label>Importo richiesto</label>
+      <div class="inp"><input id="importo" inputmode="decimal" placeholder="es. 150.000"><span>€</span></div>
+    </div>
+    <div class="field" data-f="tasso">
+      <label>Tasso annuo nominale (TAN)</label>
+      <div class="inp"><input id="tasso" inputmode="decimal" placeholder="es. 3,5"><span>%</span></div>
+    </div>
+    <div class="field" data-f="rata">
+      <label>Rata</label>
+      <div class="inp"><input id="rata" inputmode="decimal" placeholder="es. 750"><span>€</span></div>
+    </div>
+    <div class="field">
+      <label>Durata</label>
+      <div class="row2">
+        <div class="inp"><input id="durata" inputmode="numeric" placeholder="es. 20"></div>
+        <div class="inp"><select id="durataU"><option value="anni">anni</option><option value="mesi">mesi</option></select></div>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Rate</label>
+        <div class="inp"><select id="freq">
+          <option value="12">Mensili</option><option value="4">Trimestrali</option>
+          <option value="2">Semestrali</option><option value="1">Annuali</option></select></div>
+      </div>
+      <div class="field">
+        <label>Prima rata</label>
+        <div class="inp"><input id="inizio" type="month"></div>
+      </div>
+    </div>
+
+    <button class="btn" id="btnCalc">Calcola</button>
+    <div class="err" id="err"></div>
+  </div>
+
+  <div class="card" id="resCard" style="display:none">
+    <h2>Risultato</h2>
+    <div class="big"><small id="bigLbl">Rata</small><b id="bigVal">–</b></div>
+    <div class="kv"><span>Importo</span><b id="rImp"></b></div>
+    <div class="kv"><span>TAN</span><b id="rTan"></b></div>
+    <div class="kv"><span>Tasso effettivo annuo</span><b id="rTae"></b></div>
+    <div class="kv"><span>Rata</span><b id="rRata"></b></div>
+    <div class="kv"><span>Numero rate</span><b id="rN"></b></div>
+    <div class="kv"><span>Totale interessi</span><b id="rInt"></b></div>
+    <div class="kv"><span>Totale da rimborsare</span><b id="rTot"></b></div>
+    <div class="kv"><span>Ultima rata</span><b id="rFine"></b></div>
+    <div class="bar"><i id="barC" style="background:var(--cap)"></i><i id="barI" style="background:var(--int)"></i></div>
+    <div class="legend"><span><b style="background:var(--cap)"></b>Capitale</span><span><b style="background:var(--int)"></b>Interessi</span></div>
+    <div style="margin-top:16px">
+      <button class="btn" id="btnPiano">Vedi piano di ammortamento</button>
+      <button class="btn alt" id="btnSave">Salva preventivo</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PIANO ============ -->
+<section class="page" id="p-piano">
+  <div class="card" id="pianoEmpty"><div class="empty">Calcola prima una simulazione nella sezione <b>Calcola</b> oppure apri un preventivo salvato.</div></div>
+  <div id="pianoBody" style="display:none">
+    <div class="card">
+      <h2 id="pianoTitle">Piano di ammortamento</h2>
+      <div class="kv"><span>Rata</span><b id="pRata"></b></div>
+      <div class="kv"><span>Importo</span><b id="pImp"></b></div><div class="kv"><span>TAN · numero rate</span><b id="pSum"></b></div>
+      <canvas id="chart"></canvas>
+      <div class="legend" style="margin-top:6px"><span><b style="background:var(--cap)"></b>Quota capitale</span><span><b style="background:var(--int)"></b>Quota interessi</span><span><b style="background:var(--muted)"></b>Debito residuo</span></div>
+    </div>
+    <div class="card">
+      <div class="toggle" id="viewTog">
+        <button data-v="rate" class="on">Rata per rata</button>
+        <button data-v="anni">Per anno</button>
+      </div>
+      <div class="tablewrap"><table id="tbl"></table></div>
+    </div>
+    <button class="btn alt" id="btnCsv">Esporta piano (CSV)</button>
+  </div>
+</section>
+
+<!-- ============ PREVENTIVI ============ -->
+<section class="page" id="p-prev">
+  <div class="card">
+    <h2>Preventivi salvati</h2>
+    <div id="qList"></div>
+  </div>
+  <button class="btn alt" id="btnExp">Backup preventivi</button>
+  <button class="btn alt" id="btnImp">Ripristina backup</button>
+  <input type="file" id="impFile" accept="application/json,.json" hidden>
+  <p class="subtle">I preventivi restano salvati su questo telefono. Il backup ti permette di spostarli su un altro dispositivo.</p>
+</section>
+</main>
+
+<nav>
+  <button data-p="p-calc" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M16 11h0M8 15h2M12 15h2M8 18h2M12 18h2M16 15v3"/></svg>Calcola</button>
+  <button data-p="p-piano"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V4M4 20h16"/><path d="M7 16h2v-6H7zM11 16h2V8h-2zM15 16h2v-9h-2z"/></svg>Piano</button>
+  <button data-p="p-prev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg>Preventivi</button>
+</nav>
+
+<dialog id="dlgSave">
+  <h3>Salva preventivo</h3>
+  <label>Nome del preventivo</label>
+  <div class="inp"><input id="saveName" placeholder="es. Mutuo casa – Banca X"></div>
+  <div class="err" id="saveErr"></div>
+  <button class="btn" id="saveOk">Salva</button>
+  <button class="btn alt" id="saveNo">Annulla</button>
+</dialog>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- utilità ---------- */
+const $ = id => document.getElementById(id);
+const eur = v => new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(v);
+const pct = (v,d=3) => new Intl.NumberFormat('it-IT',{maximumFractionDigits:d,minimumFractionDigits:2}).format(v)+' %';
+const num = s => { // accetta "150.000,50", "150000.5", "3,5"
+  s = String(s||'').trim().replace(/\s|€|%/g,'');
+  if(!s) return NaN;
+  if(s.includes(',')) s = s.replace(/\./g,'').replace(',', '.');
+  else if((s.match(/\./g)||[]).length>1 || /^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g,'');
+  return parseFloat(s);
+};
+const fmtIn = v => new Intl.NumberFormat('it-IT',{maximumFractionDigits:6}).format(v);
+const round2 = v => Math.round(v*100)/100;
+const MESI = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),1800)}
+
+/* ---------- matematica ---------- */
+// rata = P * i / (1 - (1+i)^-n)
+function calcRata(P,i,n){ return i===0 ? P/n : P*i/(1-Math.pow(1+i,-n)); }
+function calcImporto(R,i,n){ return i===0 ? R*n : R*(1-Math.pow(1+i,-n))/i; }
+function calcTassoPeriodo(P,R,n){
+  if(R*n < P - 1e-9) throw new Error('Con questa rata non si restituisce nemmeno l\'importo: il tasso sarebbe negativo.');
+  if(Math.abs(R*n-P) < 1e-6) return 0;
+  // bisezione + Newton sul tasso per periodo
+  let lo=1e-12, hi=1;
+  while(calcRata(P,hi,n) < R){ hi*=2; if(hi>1e3) throw new Error('Tasso fuori scala: controlla i dati.'); }
+  for(let k=0;k<200;k++){
+    const mid=(lo+hi)/2;
+    if(calcRata(P,mid,n) > R) hi=mid; else lo=mid;
+    if(hi-lo<1e-15) break;
+  }
+  return (lo+hi)/2;
+}
+function piano(P,i,n,R){
+  const rows=[]; let deb=P;
+  for(let k=1;k<=n;k++){
+    const qi = deb*i;
+    let qc = R-qi;
+    if(k===n) qc = deb;               // chiude eventuali centesimi residui
+    const rata = qc+qi;
+    deb = Math.max(0, deb-qc);
+    rows.push({k, rata, qc, qi, deb});
+  }
+  return rows;
+}
+
+/* ---------- stato ---------- */
+let mode='rata', current=null, view='rate';
+const LS='amm_preventivi_v1';
+const loadQ = () => { try{return JSON.parse(localStorage.getItem(LS))||[]}catch(e){return []} };
+const saveQ = a => { try{localStorage.setItem(LS,JSON.stringify(a))}catch(e){toast('Impossibile salvare')} };
+
+/* ---------- navigazione ---------- */
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>go(b.dataset.p));
+function go(p){
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x.dataset.p===p));
+  document.querySelectorAll('.page').forEach(x=>x.classList.toggle('on',x.id===p));
+  if(p==='p-prev') renderQ();
+  if(p==='p-piano') renderPiano();
+  window.scrollTo(0,0);
+}
+
+/* ---------- modalità ---------- */
+document.querySelectorAll('#modeSeg button').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
+function setMode(m){
+  mode=m;
+  document.querySelectorAll('#modeSeg button').forEach(x=>x.classList.toggle('on',x.dataset.m===m));
+  document.querySelectorAll('.field[data-f]').forEach(f=>f.classList.toggle('hidden',f.dataset.f===m));
+  $('err').textContent='';
+}
+setMode('rata');
+(function(){const d=new Date();d.setMonth(d.getMonth()+1);$('inizio').value=d.toISOString().slice(0,7)})();
+
+/* ---------- calcolo ---------- */
+$('btnCalc').onclick = calcola;
+document.querySelectorAll('#p-calc input').forEach(e=>e.addEventListener('keydown',ev=>{if(ev.key==='Enter'){e.blur();calcola()}}));
+
+function leggi(){
+  const freq=+$('freq').value;
+  const dur=num($('durata').value);
+  if(!(dur>0)) throw new Error('Inserisci la durata.');
+  const mesi = $('durataU').value==='anni' ? dur*12 : dur;
+  const n = Math.round(mesi*freq/12);
+  if(n<1) throw new Error('Durata troppo breve per la frequenza scelta.');
+  if(Math.abs(mesi*freq/12 - n) > 1e-9) throw new Error('La durata non è un multiplo esatto della frequenza delle rate.');
+  const o={freq,n,durata:dur,durataU:$('durataU').value,inizio:$('inizio').value};
+  if(mode!=='importo'){ o.P=num($('importo').value); if(!(o.P>0)) throw new Error('Inserisci l\'importo richiesto.'); }
+  if(mode!=='tasso'){ o.tan=num($('tasso').value); if(!(o.tan>=0)) throw new Error('Inserisci il tasso (anche 0).'); }
+  if(mode!=='rata'){ o.R=num($('rata').value); if(!(o.R>0)) throw new Error('Inserisci la rata.'); }
+  return o;
+}
+function calcola(){
+  $('err').textContent='';
+  try{
+    const o=leggi();
+    let i;
+    if(mode==='rata'){ i=o.tan/100/o.freq; o.R=calcRata(o.P,i,o.n); }
+    else if(mode==='importo'){ i=o.tan/100/o.freq; o.P=calcImporto(o.R,i,o.n); }
+    else { i=calcTassoPeriodo(o.P,o.R,o.n); o.tan=i*o.freq*100; }
+    o.i=i; o.mode=mode;
+    current=o;
+    showResult();
+    // riporta il valore trovato nel campo corrispondente
+    if(mode==='rata') $('rata').value=fmtIn(round2(o.R));
+    if(mode==='importo') $('importo').value=fmtIn(round2(o.P));
+    if(mode==='tasso') $('tasso').value=fmtIn(+o.tan.toFixed(4));
+  }catch(e){ $('err').textContent=e.message; $('resCard').style.display='none'; }
+}
+function dataRata(inizio,k,freq){
+  if(!inizio) return '';
+  const [y,m]=inizio.split('-').map(Number);
+  const t=(m-1)+(k-1)*(12/freq);
+  return MESI[((t%12)+12)%12]+' '+(y+Math.floor(t/12));
+}
+function totali(o){
+  const rows=piano(o.P,o.i,o.n,o.R);
+  const int=rows.reduce((s,r)=>s+r.qi,0);
+  return {rows,int,tot:o.P+int};
+}
+function showResult(){
+  const o=current, t=totali(o);
+  const lbl={rata:'Rata',importo:'Importo richiedibile',tasso:'TAN'}[o.mode];
+  const val={rata:eur(o.R),importo:eur(o.P),tasso:pct(o.tan)}[o.mode];
+  const fr={12:'mensile',4:'trimestrale',2:'semestrale',1:'annuale'}[o.freq];
+  $('bigLbl').textContent = o.mode==='rata' ? 'Rata '+fr : lbl;
+  $('bigVal').textContent=val;
+  $('rImp').textContent=eur(o.P);
+  $('rTan').textContent=pct(o.tan);
+  $('rTae').textContent=pct((Math.pow(1+o.i,o.freq)-1)*100);
+  $('rRata').textContent=eur(o.R);
+  $('rN').textContent=o.n;
+  $('rInt').textContent=eur(t.int);
+  $('rTot').textContent=eur(t.tot);
+  $('rFine').textContent=dataRata(o.inizio,o.n,o.freq)||'–';
+  const pc=o.P/t.tot*100;
+  $('barC').style.width=pc+'%'; $('barI').style.width=(100-pc)+'%';
+  $('resCard').style.display='block';
+  setTimeout(()=>$('resCard').scrollIntoView({behavior:'smooth',block:'start'}),50);
+}
+$('btnPiano').onclick=()=>go('p-piano');
+
+/* ---------- piano ---------- */
+document.querySelectorAll('#viewTog button').forEach(b=>b.onclick=()=>{
+  view=b.dataset.v;
+  document.querySelectorAll('#viewTog button').forEach(x=>x.classList.toggle('on',x===b));
+  renderTable();
+});
+function renderPiano(){
+  if(!current){ $('pianoEmpty').style.display='block'; $('pianoBody').style.display='none'; return; }
+  $('pianoEmpty').style.display='none'; $('pianoBody').style.display='block';
+  const o=current;
+  $('pianoTitle').textContent=o.nome||'Piano di ammortamento';
+  $('pRata').textContent=eur(o.R);
+  $('pImp').textContent=eur(o.P); $('pSum').textContent=`${pct(o.tan,2)} · ${o.n}`;
+  renderTable(); requestAnimationFrame(drawChart);
+}
+function gruppiAnno(o,rows){
+  const g=[]; const per=o.freq;
+  for(let s=0;s<rows.length;s+=per){
+    const sl=rows.slice(s,s+per);
+    g.push({k:g.length+1, rata:sl.reduce((a,r)=>a+r.rata,0), qc:sl.reduce((a,r)=>a+r.qc,0),
+      qi:sl.reduce((a,r)=>a+r.qi,0), deb:sl[sl.length-1].deb, from:sl[0].k, to:sl[sl.length-1].k});
+  }
+  return g;
+}
+function renderTable(){
+  const o=current, rows=piano(o.P,o.i,o.n,o.R);
+  const f=v=>new Intl.NumberFormat('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v);
+  let h='';
+  if(view==='rate'){
+    h='<tr><th>N°</th><th>Rata</th><th>Capitale</th><th>Interessi</th><th>Residuo</th></tr>';
+    for(const r of rows){
+      const d=dataRata(o.inizio,r.k,o.freq);
+      h+=`<tr><td>${r.k}${d?`<br><small style="color:var(--muted)">${d}</small>`:''}</td><td>${f(r.rata)}</td><td>${f(r.qc)}</td><td>${f(r.qi)}</td><td>${f(r.deb)}</td></tr>`;
+    }
+  }else{
+    h='<tr><th>Anno</th><th>Rate</th><th>Capitale</th><th>Interessi</th><th>Residuo</th></tr>';
+    for(const g of gruppiAnno(o,rows)){
+      h+=`<tr><td>${g.k}°</td><td>${f(g.rata)}</td><td>${f(g.qc)}</td><td>${f(g.qi)}</td><td>${f(g.deb)}</td></tr>`;
+    }
+  }
+  const tq=rows.reduce((a,r)=>a+r.qi,0);
+  h+=`<tr class="y"><td>Totale</td><td>${f(o.P+tq)}</td><td>${f(o.P)}</td><td>${f(tq)}</td><td></td></tr>`;
+  $('tbl').innerHTML=h;
+}
+function drawChart(){
+  const o=current, rows=piano(o.P,o.i,o.n,o.R), g=gruppiAnno(o,rows);
+  const cv=$('chart'), dpr=window.devicePixelRatio||1, W=cv.clientWidth, H=cv.clientHeight;
+  if(!W) return;
+  cv.width=W*dpr; cv.height=H*dpr;
+  const c=cv.getContext('2d'); c.scale(dpr,dpr); c.clearRect(0,0,W,H);
+  const cs=getComputedStyle(document.documentElement);
+  const cCap=cs.getPropertyValue('--cap').trim(), cInt=cs.getPropertyValue('--int').trim(),
+        cMut=cs.getPropertyValue('--muted').trim(), cLine=cs.getPropertyValue('--line').trim();
+  const pad={l:4,r:4,t:10,b:18}, w=W-pad.l-pad.r, h=H-pad.t-pad.b;
+  const maxBar=Math.max(...g.map(x=>x.qc+x.qi));
+  const bw=w/g.length;
+  c.strokeStyle=cLine; c.beginPath(); c.moveTo(pad.l,pad.t+h); c.lineTo(pad.l+w,pad.t+h); c.stroke();
+  g.forEach((x,ix)=>{
+    const X=pad.l+ix*bw+bw*0.15, BW=Math.max(1,bw*0.7);
+    const hc=x.qc/maxBar*h, hi=x.qi/maxBar*h;
+    c.fillStyle=cCap; c.fillRect(X,pad.t+h-hc,BW,hc);
+    c.fillStyle=cInt; c.fillRect(X,pad.t+h-hc-hi,BW,hi);
+  });
+  // debito residuo
+  c.strokeStyle=cMut; c.lineWidth=1.5; c.setLineDash([4,3]); c.beginPath();
+  c.moveTo(pad.l, pad.t);
+  g.forEach((x,ix)=>c.lineTo(pad.l+(ix+1)*bw, pad.t+h-(x.deb/o.P)*h));
+  c.stroke(); c.setLineDash([]);
+  c.fillStyle=cMut; c.font='10px system-ui'; c.textAlign='center';
+  const step=Math.ceil(g.length/8);
+  g.forEach((x,ix)=>{ if(ix%step===0||ix===g.length-1) c.fillText(x.k, pad.l+ix*bw+bw/2, H-4); });
+}
+window.addEventListener('resize',()=>{ if($('p-piano').classList.contains('on')&&current) drawChart(); });
+
+$('btnCsv').onclick=()=>{
+  const o=current, rows=piano(o.P,o.i,o.n,o.R);
+  const f=v=>v.toFixed(2).replace('.',',');
+  let s='N;Data;Rata;Quota capitale;Quota interessi;Debito residuo\n';
+  rows.forEach(r=>s+=`${r.k};${dataRata(o.inizio,r.k,o.freq)};${f(r.rata)};${f(r.qc)};${f(r.qi)};${f(r.deb)}\n`);
+  scarica('﻿'+s, (o.nome||'piano-ammortamento').replace(/[^\w\- ]+/g,'')+'.csv','text/csv');
+};
+function scarica(txt,name,type){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([txt],{type}));
+  a.download=name; document.body.appendChild(a); a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);
+}
+
+/* ---------- preventivi ---------- */
+$('btnSave').onclick=()=>{
+  $('saveName').value=current.nome||''; $('saveErr').textContent='';
+  $('dlgSave').showModal(); setTimeout(()=>$('saveName').focus(),50);
+};
+$('saveNo').onclick=()=>$('dlgSave').close();
+$('saveOk').onclick=()=>{
+  const nome=$('saveName').value.trim();
+  if(!nome){ $('saveErr').textContent='Dai un nome al preventivo.'; return; }
+  const a=loadQ(); const ex=a.findIndex(q=>q.nome.toLowerCase()===nome.toLowerCase());
+  if(ex>=0 && !confirm(`Esiste già "${a[ex].nome}". Vuoi sovrascriverlo?`)) return;
+  const q={nome, mode:current.mode, P:current.P, tan:current.tan, R:current.R, freq:current.freq,
+    n:current.n, durata:current.durata, durataU:current.durataU, inizio:current.inizio, salvato:new Date().toISOString()};
+  if(ex>=0) a[ex]=q; else a.unshift(q);
+  saveQ(a); current.nome=nome; $('dlgSave').close(); toast('Preventivo salvato');
+};
+function renderQ(){
+  const a=loadQ(), el=$('qList');
+  if(!a.length){ el.innerHTML='<div class="empty">Nessun preventivo salvato.<br>Fai un calcolo e premi <b>Salva preventivo</b>.</div>'; return; }
+  el.innerHTML='';
+  a.forEach((q,ix)=>{
+    const d=document.createElement('div'); d.className='q';
+    const rateLbl={12:'mesi',4:'trimestri',2:'semestri',1:'anni'}[q.freq];
+    d.innerHTML=`<div class="t"><b></b><small>${eur(q.P)} · ${pct(q.tan,2)} · ${q.n} ${rateLbl}<br>Rata ${eur(q.R)}</small></div>
+      <button>Apri</button><button class="del" aria-label="Elimina">✕</button>`;
+    d.querySelector('b').textContent=q.nome;
+    d.querySelectorAll('button')[0].onclick=()=>apri(q);
+    d.querySelectorAll('button')[1].onclick=()=>{
+      if(!confirm(`Eliminare "${q.nome}"?`)) return;
+      const b=loadQ(); b.splice(ix,1); saveQ(b); renderQ();
+    };
+    el.appendChild(d);
+  });
+}
+function apri(q){
+  setMode(q.mode||'rata');
+  $('importo').value=fmtIn(round2(q.P)); $('tasso').value=fmtIn(+q.tan.toFixed(4)); $('rata').value=fmtIn(round2(q.R));
+  $('durata').value=q.durata; $('durataU').value=q.durataU; $('freq').value=q.freq; $('inizio').value=q.inizio||'';
+  current={...q, i:q.tan/100/q.freq};
+  go('p-calc'); showResult();
+}
+$('btnExp').onclick=()=>{
+  const a=loadQ(); if(!a.length){toast('Nessun preventivo da salvare');return;}
+  scarica(JSON.stringify(a,null,2),'preventivi-ammortamento.json','application/json');
+};
+$('btnImp').onclick=()=>$('impFile').click();
+$('impFile').onchange=async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  try{
+    const arr=JSON.parse(await f.text()); if(!Array.isArray(arr)) throw 0;
+    const a=loadQ(); let n=0;
+    arr.forEach(q=>{ if(q&&q.nome&&q.P>0&&q.R>0&&q.n>0){ const ix=a.findIndex(x=>x.nome===q.nome); if(ix>=0)a[ix]=q; else a.push(q); n++; } });
+    saveQ(a); renderQ(); toast(`${n} preventivi ripristinati`);
+  }catch(err){ toast('File non valido'); }
+  e.target.value='';
+};
+
+/* ---------- PWA ---------- */
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
